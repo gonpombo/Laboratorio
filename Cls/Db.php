@@ -33,10 +33,13 @@ class Db {
         }
     }
 
-    public function select($table, $columns = " * ", $where = " 1 = 1 ", $paginate = 100) {
+    public function select($table, $columns = " * ", $where = " 1 = 1 ", $data, $paginate = 100) {
         $db = $this->database;
         $columns = ($columns!= " * ") ? implode(",", $columns) : " * ";
         $query = $db->prepare(sprintf("SELECT %s FROM %s WHERE %s LIMIT %s", $columns, $table, $where, $paginate));
+        foreach ($data as $key => $value) {
+            $query->bindValue(':' . strtolower($key), '%' . urldecode($value). '%', PDO::PARAM_STR);
+        }
         $query->execute();
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($result);

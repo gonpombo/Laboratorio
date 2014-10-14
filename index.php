@@ -50,33 +50,39 @@ function parseRoute($x) {
       break;
 
       default:
-        echo $path;
         require 'index.html';
         break;
   }
 }
 
 function getActor($params, $db) {
+  $columns = [];
+  $data = [];
   $params = explode("&", $params);
   foreach ($params as $key => $value) {
     $aux = explode("=", $value);
     if($aux[0] == 'page') {
       $page = ($aux[1] - 1) * 10;
       $paginate = $page . " ," . 20;
+      unset($params[$key]);
+      break;
     }
-    unset($params[$key]);
   }
-  $params = implode(' AND ', $params);
+  foreach ($params as $key => $value) {
+    $aux = explode("=", $value);
+    $data[$aux[0]] = $aux[1];
+    array_push($columns, strtolower($aux[0]) . " LIKE :" . strtolower($aux[0]));
+  }
+  $params = implode(' AND ', $columns);
   if($params == "") {
     $params = "1 = 1";
   }
-  echo $db->select("ACTORES", ' * ', $params, $paginate);
+  echo $db->select("ACTORES", ' * ', $params, $data, $paginate);
 }
 
 function updateActor($data, $id, $db) {
   $where = "id=" . $id;
   $columns = [];
-  $values = [];
   foreach ($data as $key => $value) {
     array_push($columns, strtolower($key) . "= :" . strtolower($key));
   }

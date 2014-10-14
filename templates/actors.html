@@ -1,8 +1,8 @@
-
 <div class="container">
   <div class="">
     <button type="button" class="btn btn-primary" ng-click="toggleFilter()">{{filterText}}
   </div>
+    <br>
   <div id="filters" class="container table well light-well" ng-show="showFilters" ng-enter="setFilters(fil, true)">
     <div class="row">
       <div class="col-xs-4">
@@ -15,14 +15,16 @@
       </div>
       <div class="col-xs-4">
         <label for="nombre" class="control-label">Sexo: </label>
-        <select class="form-control">
+        <select class="form-control" ng-model="fil.sexo">
           <option></option>
           <option value="M">Masculino</option>
           <option value="F">Femenino</option>
         </select>
       </div>
     </div>
-       <button type="button" class="btn btn-primary pull-right" ng-click="setFilter()">Filtrar
+    <br>
+    <button type="button" class="btn btn-primary pull-right" ng-click="setFilter()">Filtrar
+    <button type="button" class="btn btn-danger pull-right" ng-click="resetFilter()">Resetear Filtros
   </div>
     <div>
       <h4>Lista de Actores.</h4>
@@ -38,7 +40,7 @@
             <th>Apellido</th> 
             <th>Sexo</th>
             <th>Peliculas</th>
-            <th>Actions</th>
+            <th ng-if="rol">Editar</th>
         </tr>
         <tr ng-repeat="actor in actores">
             <td>{{actor.NOMBRE}}</td>
@@ -49,7 +51,7 @@
                     <span class="glyphicon glyphicon-film"></span>
                 </a>
             </td>
-            <td>
+            <td ng-if="rol">
                 <a class="btn btn-mini btn-primary" title="Edit" ng-click="editActor(actor)">
                     <span class="glyphicon glyphicon-edit"></span>
                 </a>

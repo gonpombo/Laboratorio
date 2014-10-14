@@ -1,11 +1,17 @@
-var app = angular.module('lab', ['ngRoute']).config(function($routeProvider){
+var app = angular.module('lab', ['ngRoute', 'ngStorage']).config(function($routeProvider){
     $routeProvider
-        .when('/movies', {
-            templateUrl: 'templates/movies.html',
-            controller: 'MoviesController'
-        })
-       	.when('/actores', {
-       		templateUrl: 'templates/actors.html',
-       		controller: 'ActorsController'
-       	})
+    .when('/', {
+      templateUrl: 'templates/main.html',
+      controller: 'MainController'
+    })  
+    .when('/movies', {
+    	reloadOnSearch: false,
+        templateUrl: 'templates/movies.html',
+        controller: 'MoviesController'
+    })
+   	.when('/actores', {
+   		reloadOnSearch: false,
+   		templateUrl: 'templates/actors.html',
+   		controller: 'ActorsController'
+   	});
 });

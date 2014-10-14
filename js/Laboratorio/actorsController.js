@@ -1,14 +1,16 @@
-app.controller('ActorsController', ['$scope','$http','$routeParams', '$location', function($scope, $http, $routeParams, $location) {
+app.controller('ActorsController', ['$scope','$http','$routeParams', '$location', '$localStorage', function($scope, $http, $routeParams, $location, $localStorage) {
   var getMovies, validate;
   $scope.showFilters = false;
   $scope.actores = {};
   $scope.movies = {};
-  $scope.page = parseInt($routeParams.page) || 1;
   $scope.filterText = "Mostrar Filtros";
   $scope.modal = {};
-  getActors = function(page) {
+  $scope.fil = {};
+  $scope.rol = $localStorage.rol === 'admin';
+
+  getActors = function(params) {
     $http.get('/actors', {
-    	params: {page: page}
+      params: params
     }).success(function(data) {
         $scope.actores = data;
     });
@@ -16,12 +18,16 @@ app.controller('ActorsController', ['$scope','$http','$routeParams', '$location'
 
   $scope.nextPage = function() {
 		$scope.page = $scope.page + 1;
+    $scope.fil.page = $scope.page;
 		$location.search('page', $scope.page);
+    getActors($scope.fil);
   };
 
   $scope.prevPage = function() {
   	$scope.page = $scope.page - 1;
-		$location.search('page', $scope.page)
+    $scope.fil.page = $scope.page;
+		$location.search('page', $scope.page);
+    getActors($scope.fil);
   };
 
   $scope.viewMovies = function(id, nombre, apellido) {
@@ -78,5 +84,30 @@ app.controller('ActorsController', ['$scope','$http','$routeParams', '$location'
     $scope.filterText = $scope.showFilters ? "Ocultar Filtros" : "Mostrar Filtros";
   };
 
-  getActors($scope.page);
+  $scope.setFilter = function() {
+    $scope.page = 1;
+    $scope.fil.page = 1;
+    for(var i in $scope.fil) {
+      $location.search(i, $scope.fil[i]);
+    }
+    getActors($scope.fil);
+  }
+
+  $scope.resetFilter = function() {
+    $scope.fil = {};
+    $scope.fil.page = 1;
+    $scope.page = 1 ;
+    $location.url($location.path())
+    getActors($scope.fil);
+  }
+
+  var init = function() {
+    getActors($routeParams);
+    $scope.page = parseInt($routeParams.page) || 1;
+    $scope.fil.page = $scope.page; 
+    for(var i in $routeParams) {
+      $scope.fil[i] = $routeParams[i];
+    }
+  }
+  init();
 }]);
