@@ -13,5 +13,13 @@ var app = angular.module('lab', ['ngRoute', 'ngStorage']).config(function($route
    		reloadOnSearch: false,
    		templateUrl: 'templates/actors.html',
    		controller: 'ActorsController'
-   	});
+   	})
+    .when('/directores', {
+      reloadOnSearch: false,
+      templateUrl: 'templates/directors.html',
+      controller: 'DirectorsController'
+    })
+    .otherwise({
+      redirectTo: '/'
+    });
 });

@@ -1,9 +1,5 @@
 <?php
 
-//
-//echo $database->delete("movies", "id=7");
-//echo $database->update("movies", "name='EzeBoton'", 'id=4');
-//echo $database->insert("movies", ["name", "description"], ["juan", "malisima"]);
 function parseRoute($x) {
   include "Cls/Db.php";
   $database = Db::getInstance();
@@ -16,15 +12,10 @@ function parseRoute($x) {
   switch ($path) {
 	  case 'movies':
       if($method == 'POST') {
-        postMovie($data, $database);
+        update($data, $id, $database, "PELICULAS");
       } else if($method == 'GET') {
-        isset($params) ?  getMovieParam((int) $params, $database) : getMovie($database);
-      } else if($method == 'DELETE') {
-        if((int)$params) {
-          deleteMovie($database, $params);
-        } else {
-          echo "Error";
-        }
+        isset($params) ? $params : $params = 'page=1';
+        get($params, $database, "PELICULAS");
       } else {
         echo $method;
       }
@@ -32,10 +23,20 @@ function parseRoute($x) {
 
     case 'actors': 
       if($method == 'POST') {
-        updateActor($data, $id, $database);
+        update($data, $id, $database, "ACTORES");
       } else if($method == 'GET') {
         isset($params) ? $params  : $params = 'page=1';
-        getActor($params, $database);
+        get($params, $database, "ACTORES");
+      } else {
+        echo $method;
+      }
+      break;
+    case 'directors': 
+      if($method == 'POST') {
+        update($data, $id, $database, "DIRECTORES");
+      } else if($method == 'GET') {
+        isset($params) ? $params  : $params = 'page=1';
+        get($params, $database, "DIRECTORES");
       } else {
         echo $method;
       }
@@ -49,13 +50,29 @@ function parseRoute($x) {
       }
       break;
 
+    case 'movieActor':
+      if($method == 'GET') {
+        isset($params) ? $params : $params = "id=0";
+        $params = explode("=", $params);
+        getMovieActor($params[1], $database); 
+      }
+      break;
+
+    case 'directorMovie':
+      if($method == 'GET') {
+        isset($params) ? $params : $params = "id=0";
+        $params = explode("=", $params);
+        getDirectorMovie($params[1], $database); 
+      }
+      break;
+
       default:
         require 'index.html';
         break;
   }
 }
 
-function getActor($params, $db) {
+function get($params, $db, $table) {
   $columns = [];
   $data = [];
   $params = explode("&", $params);
@@ -77,17 +94,17 @@ function getActor($params, $db) {
   if($params == "") {
     $params = "1 = 1";
   }
-  echo $db->select("ACTORES", ' * ', $params, $data, $paginate);
+  echo $db->select($table, ' * ', $params, $data, $paginate);
 }
 
-function updateActor($data, $id, $db) {
+function update($data, $id, $db, $table) {
   $where = "id=" . $id;
   $columns = [];
   foreach ($data as $key => $value) {
     array_push($columns, strtolower($key) . "= :" . strtolower($key));
   }
   $columns = implode(', ', $columns);
-  $res = $db->update("ACTORES", $columns, $data, $where);
+  $res = $db->update($table, $columns, $data, $where);
   if($res == "true") {
     $res = $data;
   } else {
@@ -104,25 +121,18 @@ function getActorMovie($params, $db) {
 
 }
 
-function getMovie($db){
-    echo $db->select("movies");
+function getMovieActor($params, $db) {
+  $columns = ["a.NOMBRE", "a.APELLIDO", "a.SEXO"];
+  $table = "ACTORES AS a, ACTORES_PELICULAS AS p";
+  $where = "p.ID_PELICULA=" . $params . " AND p.ID_ACTOR=a.ID";
+  echo $db->select($table, $columns, $where);
 }
 
-function getMovieParam($id, $db) {
-    echo $db->select("movies", " * ", "id=".$id);
-}
-
-function postMovie($data, $db) {
-    $columns = ["name", "description", "director", "year", "rating"];
-    $postData = [];
-    foreach($columns as $c) {
-        array_push($postData, $data[$c]);
-    }
-    echo $db->insert("movies", $columns, $postData);
-}
-
-function deleteMovie($db, $id) {
-    echo $db->delete("movies", 'id='.$id);
+function getDirectorMovie($params, $db) {
+  $columns = ["p.NOMBRE", "p.ANIO"];
+  $table = "DIRECTORES_PELICULAS AS a, PELICULAS AS p";
+  $where = "a.ID_DIRECTOR=" . $params . " AND p.ID=a.ID_PELICULA";
+  echo $db->select($table, $columns, $where);
 }
 
 
